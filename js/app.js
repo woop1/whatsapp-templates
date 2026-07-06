@@ -1,10 +1,8 @@
-const state = { plantillas: [] };
-
-// HU1
-function agregarPlantilla(titulo, mensaje, hashtag) {
-  const nueva = new Template(titulo, mensaje, hashtag);
-  state.plantillas.push(nueva);
-}
+const state = {
+  plantillas: [],
+  editandoId: null,
+  filtro: ""
+};
 
 // DOM
 const lista = document.getElementById("listaPlantillas");
@@ -20,20 +18,100 @@ function normalizarHashtag(texto) {
   return limpio.startsWith("#") ? limpio : "#" + limpio;
 }
 
-// HU2
+// HU1
+function agregarPlantilla(titulo, mensaje, hashtag) {
+  const nueva = new Template(titulo, mensaje, hashtag);
+  state.plantillas.push(nueva);
+}
+
+// HU1 eliminar
+function eliminarPlantilla(id) {
+  state.plantillas = state.plantillas.filter(
+    plantilla => plantilla.id !== id
+  );
+  render();
+}
+
+// HU2 editar (cargar datos)
+function cargarEnFormulario(id) {
+  const plantilla = state.plantillas.find(
+    plantilla => plantilla.id === id
+  );
+
+  titulo.value = plantilla.titulo;
+  mensaje.value = plantilla.mensaje;
+  hashtag.value = plantilla.hashtag;
+
+  state.editandoId = id;
+}
+
+// HU3 stats
+function contarPorHashtag(plantillas) {
+  const conteo = {};
+
+  plantillas.forEach(function (plantilla) {
+    const elHashtag = plantilla.hashtag;
+
+    if (conteo[elHashtag]) {
+      conteo[elHashtag] = conteo[elHashtag] + 1;
+    } else {
+      conteo[elHashtag] = 1;
+    }
+  });
+
+  return conteo;
+}
+
+function renderStats() {
+  const total = state.plantillas.length;
+  const porTag = contarPorHashtag(state.plantillas);
+
+  const etiquetas = Object.entries(porTag)
+    .map(([hashtag, cantidad]) =>
+      `<span class="text-xs bg-white border border-slate-200 px-2 py-0.5 rounded-full">${hashtag} · ${cantidad}</span>`
+    )
+    .join("");
+
+  document.getElementById("panel-stats").innerHTML = `
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-sm font-semibold text-slate-700">${total} plantilla(s)</span>
+      ${etiquetas}
+    </div>
+  `;
+}
+
+// HU4 filtro
+function plantillasVisibles() {
+  const filtroTexto = (state.filtro ?? "").toLowerCase();
+
+  if (filtroTexto === "") return state.plantillas;
+
+  return state.plantillas.filter(plantilla =>
+    plantilla.hashtag.toLowerCase().includes(filtroTexto)
+  );
+}
+
+// HU2 generar mensaje
+function generarMensajeFinal(plantilla, valorNombre) {
+  return plantilla.mensaje.replaceAll("{nombre}", valorNombre);
+}
+
+const salida = document.getElementById("mensaje-final");
+
+// RENDER
 function render() {
   lista.innerHTML = "";
 
-  state.plantillas.forEach(function (plantilla) {
-    const fechaTexto = plantilla.fecha.toLocaleDateString("es-PE");
-
+  plantillasVisibles().forEach(function (plantilla) {
     const li = document.createElement("li");
     li.className = "bg-white p-4 rounded-lg shadow";
 
     li.innerHTML = `
       <div class="flex items-start justify-between gap-2">
         <strong class="text-slate-800">${plantilla.titulo}</strong>
-        <span class="text-xs text-slate-400 shrink-0">${fechaTexto}</span>
+        <span class="text-xs text-slate-400 shrink-0">
+          ${plantilla.fecha.toLocaleDateString("es-PE")}
+        </span>
       </div>
 
       <p class="text-sm text-slate-600 mt-1">${plantilla.mensaje}</p>
@@ -41,15 +119,27 @@ function render() {
       <span class="inline-block text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full mt-2">
         ${plantilla.hashtag}
       </span>
+
+      <div class="flex gap-2 mt-3 pt-2 border-t border-slate-100">
+        <button class="btn-editar text-xs px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+          data-id="${plantilla.id}">
+          Editar
+        </button>
+
+        <button class="btn-eliminar text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition"
+          data-id="${plantilla.id}">
+          Eliminar
+        </button>
+      </div>
     `;
 
     lista.appendChild(li);
   });
 
-  renderSelector();
+  renderStats();
 }
 
-// HU3 + HU1 conexión
+// SUBMIT crear / editar
 form.addEventListener("submit", function (evento) {
   evento.preventDefault();
 
@@ -61,48 +151,51 @@ form.addEventListener("submit", function (evento) {
     return;
   }
 
-  agregarPlantilla(
-    tituloTexto,
-    mensajeTexto,
-    normalizarHashtag(hashtag.value)
-  );
+  if (state.editandoId) {
+    state.plantillas = state.plantillas.map(plantilla =>
+      plantilla.id === state.editandoId
+        ? {
+            ...plantilla,
+            titulo: tituloTexto,
+            mensaje: mensajeTexto,
+            hashtag: normalizarHashtag(hashtag.value)
+          }
+        : plantilla
+    );
+
+    state.editandoId = null;
+
+  } else {
+    agregarPlantilla(
+      tituloTexto,
+      mensajeTexto,
+      normalizarHashtag(hashtag.value)
+    );
+  }
 
   render();
   form.reset();
 });
 
-// HU4
-const selector = document.getElementById("selector");
+// DELEGACIÓN DE EVENTOS
+lista.addEventListener("click", function (evento) {
+  const id = evento.target.dataset.id;
 
-function renderSelector() {
-  selector.innerHTML = state.plantillas
-    .map(function (plantilla, indice) {
-      return `<option value="${indice}">
-                ${plantilla.titulo}
-              </option>`;
-    })
-    .join("");
-}
+  if (evento.target.classList.contains("btn-eliminar")) {
+    eliminarPlantilla(id);
+  }
 
-function generarMensajeFinal(plantilla, valorNombre) {
-  return plantilla.mensaje.replaceAll("{nombre}", valorNombre);
-}
+  if (evento.target.classList.contains("btn-editar")) {
+    cargarEnFormulario(id);
+  }
+});
 
-const salida = document.getElementById("mensaje-final");
-
-document.getElementById("btn-generar")
-  .addEventListener("click", function () {
-
-    const plantilla = state.plantillas[Number(selector.value)];
-    const nombre = document.getElementById("valorNombre").value.trim();
-
-    salida.textContent = generarMensajeFinal(plantilla, nombre);
+// BUSCADOR HU4
+document.getElementById("buscador")
+  .addEventListener("input", function (evento) {
+    state.filtro = evento.target.value;
+    render();
   });
 
-document.getElementById("btn-copiar")
-  .addEventListener("click", function () {
-    navigator.clipboard.writeText(salida.textContent);
-  });
-
-// render inicial (opcional pero necesario para que todo funcione limpio)
+// INIT
 render();
