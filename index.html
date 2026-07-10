@@ -8,6 +8,7 @@
 </head>
 
 <body class="bg-slate-100 min-h-screen p-6">
+
   <h1 class="text-3xl font-bold text-center text-slate-800 mb-6">
     Mis Plantillas
   </h1>
@@ -15,11 +16,14 @@
   <!-- Dos columnas -->
   <div class="max-w-5xl mx-auto grid gap-6 md:grid-cols-[320px_1fr]">
 
-    <!-- Columna izquierda -->
+
+    <!-- COLUMNA IZQUIERDA -->
     <div class="grid gap-6 self-start">
+
 
       <!-- Formulario -->
       <form id="form-plantilla" class="bg-white p-4 rounded-xl shadow grid gap-2">
+
         <input id="titulo" type="text" placeholder="Título"
           class="p-2 border border-slate-300 rounded">
 
@@ -32,54 +36,125 @@
         <button class="bg-emerald-600 text-white py-2 rounded">
           Agregar plantilla
         </button>
+
       </form>
 
-      <!-- HU4: Generador -->
+
+
+      <!-- Generador -->
       <section id="generador" class="bg-white p-4 rounded-xl shadow grid gap-3">
-        <h2 class="font-bold text-slate-800">✨ Usar plantilla</h2>
+
+        <h2 class="font-bold text-slate-800">
+          ✨ Usar plantilla
+        </h2>
+
 
         <label class="grid gap-1 text-xs text-slate-500">
           Plantilla
-          <select id="selector" class="p-2 border border-slate-300 rounded text-slate-800"></select>
+
+          <select id="selector"
+            class="p-2 border border-slate-300 rounded text-slate-800">
+          </select>
+
         </label>
+
+
 
         <label class="grid gap-1 text-xs text-slate-500">
           Nombre real
+
           <input id="valorNombre" type="text" placeholder="ej. Ana"
             class="p-2 border border-slate-300 rounded text-slate-800">
+
         </label>
+
+
 
         <button id="btn-generar"
           class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded transition">
+
           Generar
+
         </button>
 
+
+
         <div class="bg-slate-50 border border-slate-200 rounded p-3 grid gap-2">
+
           <p id="mensaje-final"
-            class="text-sm text-slate-700 whitespace-pre-wrap min-h-[1.5rem]"></p>
+            class="text-sm text-slate-700 whitespace-pre-wrap min-h-[1.5rem]">
+          </p>
+
 
           <button id="btn-copiar"
             class="justify-self-end text-xs text-emerald-700 hover:text-emerald-800">
+
             📋 Copiar
+
           </button>
+
         </div>
+
+
       </section>
 
+
     </div>
+    <!-- FIN COLUMNA IZQUIERDA -->
 
-    <input id="buscador" type="text" placeholder="Filtra por hashtag…"
-  class="w-full p-2 border border-slate-300 rounded-lg">
 
-<aside id="panel-stats" class="bg-slate-100 rounded-lg p-3"></aside>
 
-    <!-- Columna derecha -->
-    <ul id="listaPlantillas"
-      class="grid gap-3 sm:grid-cols-2 content-start">
-    </ul>
+
+    <!-- COLUMNA DERECHA -->
+    <div class="grid gap-3 content-start">
+
+
+      <!-- Buscador -->
+      <input id="buscador" type="text" placeholder="Filtra por hashtag…"
+        class="w-64 p-2 border border-slate-300 rounded">
+
+
+
+      <!-- Estadísticas -->
+      <aside id="panel-stats"
+        class="bg-slate-100 rounded-lg p-3">
+      </aside>
+
+
+
+      <!-- Resultados -->
+  <ul id="listaPlantillas"
+    class="grid gap-3 sm:grid-cols-2 content-start">
+  </ul>
+
+
+  <div class="flex items-center justify-between border-t border-slate-200 pt-3 mt-1">
+
+    <p id="estado"
+      class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+      Listo
+    </p>
+
+    <button id="btn-vaciar"
+      class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition">
+      Vaciar todo
+    </button>
 
   </div>
 
-  <script src="js/models/Template.js"></script>
-  <script src="js/app.js"></script>
+</div>
+
+
+    </div>
+    <!-- FIN COLUMNA DERECHA -->
+
+
+  </div>
+
+
+<script src="js/models/Template.js"></script>
+<script src="js/persistence.js"></script>
+<script src="js/app.js"></script>
+
 </body>
 </html>

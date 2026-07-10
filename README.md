@@ -1,4 +1,7 @@
-Aquí tienes el **README.md completo, integrado y listo para entrega**, con todo lo que ya tenías + lo que te pidieron agregar:
+
+## 🌐 Deploy
+
+👉 [https://woop1.github.io/whatsapp-templates/](https://woop1.github.io/whatsapp-templates/)
 
 ---
 
@@ -133,10 +136,209 @@ function contarPorHashtag(plantillas) {
 * Mostrar cuántas plantillas existen por hashtag.
 * Mantener el panel de estadísticas actualizado automáticamente al agregar, editar o eliminar plantillas.
 
+
 ---
 
-## 🌐 Deploy
+# 💾 Persistencia de datos
 
-👉 [https://woop1.github.io/whatsapp-templates/](https://woop1.github.io/whatsapp-templates/)
+La aplicación permite conservar las plantillas creadas por el usuario incluso después de cerrar o recargar el navegador.
+
+La persistencia se realiza utilizando `localStorage` del navegador y se encuentra centralizada en el archivo:
+
+```
+js/persistence.js
+```
+
+---
+
+## 💾 Guardado del estado
+
+Para almacenar las plantillas se utiliza una clave única:
+
+```js
+const CLAVE = "whatsapp-templates";
+```
+
+Como `localStorage` solamente permite guardar información en formato texto, el array de objetos `state.plantillas` debe convertirse a JSON antes de almacenarse.
+
+Ejemplo:
+
+```js
+localStorage.setItem(
+  CLAVE,
+  JSON.stringify(state.plantillas)
+);
+```
+
+### 📌 ¿Cómo funciona?
+
+* El estado actual de las plantillas se convierte en una cadena JSON.
+* Esa información se guarda dentro del navegador.
+* Cada modificación realizada en las plantillas actualiza automáticamente los datos almacenados.
+
+El guardado ocurre dentro de la función `render()`, ya que todas las acciones importantes terminan ejecutando esta función:
+
+* Crear una plantilla.
+* Editar una plantilla.
+* Eliminar una plantilla.
+* Vaciar la lista completa.
+
+---
+
+## 🗑️ Eliminación cuando no existen datos
+
+Cuando la lista de plantillas queda vacía, se elimina la información almacenada:
+
+```js
+localStorage.removeItem(CLAVE);
+```
+
+### 🎯 ¿Para qué sirve?
+
+* Evita guardar información innecesaria.
+* Mantiene limpio el almacenamiento del navegador.
+* Permite que la aplicación inicie correctamente sin datos antiguos.
+
+---
+
+# 📥 Carga del estado
+
+Al iniciar la aplicación, se recuperan automáticamente las plantillas almacenadas:
+
+```js
+state.plantillas = cargar();
+```
+
+La función `cargar()` obtiene la información guardada en `localStorage` y la convierte nuevamente en un array:
+
+```js
+const guardado = localStorage.getItem(CLAVE);
+
+return guardado ? JSON.parse(guardado) : [];
+```
+
+### 📌 ¿Cómo funciona?
+
+* Busca los datos almacenados utilizando la clave correspondiente.
+* Convierte el texto JSON nuevamente en objetos JavaScript.
+* Si no existen datos guardados, devuelve una lista vacía.
+
+Ejemplo:
+
+```js
+[]
+```
+
+Esto permite que la aplicación funcione correctamente incluso cuando se utiliza por primera vez.
+
+---
+
+# ⚠️ Manejo de datos corruptos
+
+Para evitar que la aplicación falle cuando los datos almacenados tienen un formato incorrecto, se utiliza `try/catch`.
+
+Ejemplo de dato corrupto:
+
+```text
+[{titulo
+```
+
+Al intentar convertirlo con:
+
+```js
+JSON.parse(guardado);
+```
+
+JavaScript genera un error porque el contenido no es un JSON válido.
+
+Para manejar este caso se utiliza:
+
+```js
+try {
+  return JSON.parse(guardado);
+} catch (error) {
+  console.warn("Datos corruptos, empiezo de cero:", error);
+  return [];
+}
+```
+
+### 📌 ¿Qué ocurre si los datos están dañados?
+
+* Se muestra una advertencia en la consola.
+* La aplicación continúa funcionando.
+* Las plantillas se reinician como una lista vacía.
+
+### 🎯 ¿Para qué sirve?
+
+Permite que un dato corrupto dentro de `localStorage` no bloquee el funcionamiento completo de la aplicación.
+
+---
+
+# 🔎 Persistencia del filtro de búsqueda
+
+Además de las plantillas, también se guarda el filtro utilizado por el usuario.
+
+Para esto se utiliza una segunda clave:
+
+```js
+const CLAVE_FILTRO = "whatsapp-templates-filtro";
+```
+
+Como el filtro ya es texto, no necesita convertirse con `JSON.stringify()`:
+
+```js
+localStorage.setItem(
+  CLAVE_FILTRO,
+  state.filtro ?? ""
+);
+```
+
+Al abrir nuevamente la aplicación:
+
+* Se recupera el último filtro utilizado.
+* El buscador mantiene el mismo valor.
+* El usuario puede continuar trabajando desde donde dejó la aplicación.
+
+---
+
+# 📅 Manejo de fechas
+
+Cada plantilla guarda una fecha automática de creación utilizando:
+
+```js
+new Date()
+```
+
+Sin embargo, JSON no conserva objetos `Date` como objetos JavaScript, sino que los convierte en texto.
+
+Por este motivo, al mostrar la fecha nuevamente en pantalla se reconstruye:
+
+```js
+new Date(plantilla.fecha).toLocaleDateString("es-PE")
+```
+
+### 📌 ¿Cómo funciona?
+
+* La fecha se guarda como texto dentro del JSON.
+* Al cargar la información, se vuelve a convertir en un objeto `Date`.
+* Se muestra utilizando el formato de fecha local de Perú.
+
+### 🎯 ¿Para qué sirve?
+
+Permite seguir mostrando correctamente las fechas de creación después de cerrar y volver a abrir la aplicación.
+
+---
+
+# ✅ Resultado final
+
+Gracias al uso de `localStorage`, la aplicación logra:
+
+* Mantener las plantillas creadas por el usuario.
+* Recuperar la información automáticamente al iniciar.
+* Evitar errores causados por datos dañados.
+* Recordar el filtro de búsqueda.
+* Conservar las fechas de creación.
+
+Esto proporciona una experiencia más completa sin necesidad de utilizar una base de datos externa.
 
 ---
