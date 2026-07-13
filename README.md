@@ -342,3 +342,81 @@ Gracias al uso de `localStorage`, la aplicación logra:
 Esto proporciona una experiencia más completa sin necesidad de utilizar una base de datos externa.
 
 ---
+
+La aplicación está desarrollada con JavaScript utilizando módulos ESM (ECMAScript Modules), separando la lógica del estado, la persistencia de datos y la interfaz de usuario para lograr una estructura más ordenada y mantenible.
+
+### 🏗️ Arquitectura modular con ESM
+
+La aplicación utiliza `import` y `export` para comunicar los diferentes módulos, evitando el uso de variables globales y separando las responsabilidades de cada archivo.
+
+La arquitectura principal está dividida en tres módulos:
+
+### 🧠 state.js
+
+Este módulo administra el estado de la aplicación.
+
+Se encarga de mantener:
+
+- La lista de plantillas.
+- La plantilla que se encuentra en edición.
+- El filtro actual del buscador.
+- El orden seleccionado para mostrar las plantillas.
+
+También contiene la lógica relacionada con el procesamiento de datos, como la normalización de hashtags, filtrado y ordenamiento de plantillas.
+
+### 💾 storage.js
+
+Este módulo controla la persistencia de los datos mediante `localStorage`.
+
+Sus funciones principales son:
+
+- `guardar()` para almacenar las plantillas y el filtro actual.
+- `cargar()` para recuperar la información guardada cuando inicia la aplicación.
+
+La información se convierte a formato JSON utilizando `JSON.stringify()` antes de guardarse y se recupera nuevamente con `JSON.parse()` al iniciar la aplicación.
+
+De esta manera, las plantillas y el filtro permanecen disponibles aunque la página sea cerrada o recargada.
+
+### 🎨 ui.js
+
+Este módulo se encarga de manejar la interfaz de usuario.
+
+Sus responsabilidades son:
+
+- Renderizar las plantillas en pantalla.
+- Actualizar estadísticas.
+- Mostrar mensajes cuando no existen resultados.
+- Controlar eventos de botones y formularios.
+- Actualizar la vista cuando cambia el estado de la aplicación.
+
+Este módulo utiliza la información de `state.js` y `storage.js` mediante `import`.
+
+### 🔄 Comunicación entre módulos
+
+Los módulos se comunican utilizando la sintaxis ESM mediante `import` y `export`.
+
+Esto permite mantener el código separado y organizado, donde cada archivo tiene una responsabilidad específica.
+
+El flujo de funcionamiento es:
+
+Usuario → ui.js → state.js → storage.js → localStorage
+
+### 💽 Persistencia de datos
+
+La aplicación utiliza `localStorage` como sistema de almacenamiento del navegador.
+
+Las plantillas y datos necesarios se convierten a formato JSON antes de guardarse mediante:
+
+`JSON.stringify()`
+
+Cuando la aplicación vuelve a iniciarse, los datos almacenados son recuperados y convertidos nuevamente en objetos JavaScript utilizando:
+
+`JSON.parse()`
+
+La información que se mantiene guardada corresponde a:
+
+- Las plantillas creadas por el usuario.
+- El filtro actual utilizado en la aplicación.
+
+Gracias a este sistema de persistencia, los datos permanecen disponibles después de cerrar o actualizar la página.
+
